@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${SQLITE_URL:jdbc:sqlite:./data/confeccoes.db}
+    username:
+    password:
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: false
+
+# Perfil de compatibilidade para SQLite; não aplica a migração MySQL automaticamente.

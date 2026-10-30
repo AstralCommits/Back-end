@@ -1,0 +1,46 @@
+### Health
+GET http://localhost:8080/api/health
+
+### Cidades homologadas
+GET http://localhost:8080/api/cidades
+
+### Listar categorias
+GET http://localhost:8080/api/categorias
+
+### Criar categoria
+POST http://localhost:8080/api/categorias
+Content-Type: application/json
+
+{
+  "nome": "Jeans"
+}
+
+### Criar confecção (troque a categoria de acordo com a resposta anterior)
+POST http://localhost:8080/api/confeccoes
+Content-Type: application/json
+
+{
+  "nome": "Confecção Modelo API",
+  "cnpj": null,
+  "porte": "PEQUENA",
+  "tipo": "CONFECCAO",
+  "cidade": "Caruaru"
+}
+
+### Criar lançamento mensal (substitua IDs pelas respostas reais)
+POST http://localhost:8080/api/vendas
+Content-Type: application/json
+
+{
+  "idConfeccao": 1,
+  "idCategoria": 1,
+  "mesAno": "2026-10",
+  "quantidade": 120,
+  "faturamento": 3600.00,
+  "origem": "MANUAL",
+  "origemDado": "FONTE_SECUNDARIA",
+  "nomeFonte": "Relatório setorial identificado"
+}
+
+### Consultar vendas por filtros
+GET http://localhost:8080/api/vendas?categoria=1&confeccao=1&mesAno=2026-10

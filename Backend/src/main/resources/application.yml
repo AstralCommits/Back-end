@@ -1,0 +1,18 @@
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+
+spring:
+  application:
+    name: trama-backend
+  profiles:
+    default: local
+  jpa:
+    open-in-view: false
+  jackson:
+    default-property-inclusion: non_null
+
+trama:
+  cors:
+    allowed-origins: ${TRAMA_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
