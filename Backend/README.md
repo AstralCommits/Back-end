@@ -1,243 +1,213 @@
-# TRAMA Backend
+# TRAMA | Backend
 
-API REST do projeto **TRAMA — Tecendo Relações e Analisando o Mercado do Agreste**. Este repositório implementa as issues BACK-01 a BACK-04 com Java 21, Spring Boot 3.3.x, Maven, Spring Web, Spring Data JPA, Bean Validation, Spring Security e drivers para MySQL e SQLite.
+API REST do projeto **TRAMA — Tecendo Relações e Analisando o Mercado do Agreste**.
 
-## O que está implementado
+O backend é responsável por disponibilizar os serviços que permitem cadastrar, consultar e gerenciar informações relacionadas às confecções, categorias e lançamentos mensais de vendas do Polo de Confecções do Agreste Pernambucano.
 
-- Inicialização Spring Boot na porta `8080`.
-- Perfil `local` com H2 em memória para executar e testar a API sem conectar o banco MySQL da equipe.
-- Perfil `dev` para o banco MySQL `confeccoes` existente.
-- Perfil `sqlite` para um arquivo SQLite configurável.
-- Entidades JPA: `Cidade`, `Confeccao`, `Categoria`, `LancamentoMensal`, `CenarioConcorrencia` e `Usuario`.
-- Repositórios `JpaRepository` para as entidades centrais.
-- CRUD REST de categorias e confecções.
-- Cadastro, consulta com filtros, atualização e cancelamento de lançamentos mensais.
-- Validações para categorias duplicadas, cidades autorizadas, campos obrigatórios, mês `AAAA-MM`, quantidades e valores não negativos.
-- Bloqueio de lançamento duplicado para a mesma confecção/categoria/mês.
-- Procedência do dado devolvida no JSON por `origemDado` e `nomeFonte`.
-- Tratamento consistente de erros em JSON.
-- Testes de integração com MockMvc.
+A aplicação foi desenvolvida com Java 21, Spring Boot 3.3.x e Maven, utilizando Spring Web, Spring Data JPA, Bean Validation e Spring Security.
 
-## Atenção à segurança
+## 1. Contexto e objetivo
 
-A dependência Spring Security está incluída, mas a configuração de segurança da API está deliberadamente aberta para facilitar integração e testes destas quatro issues. **Esta versão não deve ser publicada em produção com dados reais antes de implementar autenticação/autorização da API e isolamento por confecção.** Não utilize contas ou senhas de demonstração para contornar isso.
+O backend foi desenvolvido para atender às primeiras quatro demandas técnicas do projeto, identificadas como BACK-01 a BACK-04.
 
-## Requisitos
+Seu objetivo é disponibilizar uma API REST que faça a comunicação entre a aplicação e o banco de dados, centralizando as regras de negócio e garantindo a validação das informações cadastradas.
 
-- Java 21.
-- Maven 3.9+ (ou utilizar `./mvnw`, que tenta usar Maven instalado e, se necessário, baixar Maven 3.9.9).
-- MySQL 8 para o perfil `dev`, se for usar o banco da equipe.
+As funcionalidades implementadas neste escopo são:
 
-## Executar localmente sem alterar o banco da equipe
+- Configuração inicial da aplicação Spring Boot.
+- Mapeamento das principais entidades do modelo relacional.
+- Cadastro, consulta, atualização e exclusão de categorias e confecções.
+- Cadastro e consulta de lançamentos mensais de vendas.
+- Validação de dados e bloqueio de registros duplicados.
+- Registro da procedência das informações de vendas.
 
-O perfil padrão é `local`, que utiliza um H2 em memória. Ele é adequado para testar endpoints, não é armazenamento persistente e é reiniciado quando a aplicação é encerrada.
+## 2. Tecnologias utilizadas
 
-Linux/macOS:
+| Tecnologia | Finalidade |
+|---|---|
+| Java 21 LTS | Linguagem de programação |
+| Spring Boot 3.3.x | Estrutura principal da aplicação |
+| Maven | Gerenciamento de dependências e build |
+| Spring Web | Criação dos endpoints REST |
+| Spring Data JPA | Persistência e comunicação com o banco |
+| Hibernate | Mapeamento objeto-relacional |
+| Bean Validation | Validação dos dados recebidos |
+| Spring Security | Configuração de segurança da aplicação |
+| MySQL 8 | Banco de dados principal |
+| SQLite | Suporte a banco em arquivo |
+| H2 | Banco em memória para testes locais |
+| JUnit e MockMvc | Testes automatizados da API |
 
-```bash
-./mvnw clean test
-./mvnw spring-boot:run
-```
+## 3. Arquitetura do backend
 
-Windows:
+A aplicação utiliza uma arquitetura em camadas, separando as responsabilidades de cada parte do sistema.
 
-```bat
-mvnw.cmd clean test
-mvnw.cmd spring-boot:run
-```
+| Camada | Responsabilidade |
+|---|---|
+| Controller | Recebe as requisições HTTP e disponibiliza os endpoints da API. |
+| Service | Executa as regras de negócio e controla as operações. |
+| Repository | Realiza o acesso e a persistência dos dados no banco. |
+| Model | Representa as entidades do banco de dados por meio de classes Java. |
+| DTO | Define os dados recebidos e enviados pela API, incluindo validações. |
+| Config | Centraliza as configurações da aplicação e da segurança. |
+| Error | Padroniza o tratamento e as respostas de erros. |
 
-A API será iniciada em `http://localhost:8080`.
+O fluxo de uma requisição acontece da seguinte forma:
 
-Verificação de saúde:
+1. O cliente envia uma requisição HTTP para um endpoint.
+2. O Controller recebe os dados e encaminha a operação.
+3. O Service aplica as regras de negócio e validações necessárias.
+4. O Repository realiza a consulta ou alteração no banco de dados.
+5. A aplicação retorna uma resposta JSON ao cliente.
 
-```bash
-curl http://localhost:8080/api/health
-```
+## 4. Mapeamento das entidades JPA
 
-Resposta esperada:
+As entidades representam as estruturas do modelo relacional do banco de dados dentro da aplicação Java. O mapeamento é realizado utilizando anotações JPA, como `@Entity`, `@Table`, `@Id`, `@ManyToOne` e `@JoinColumn`.
 
-```json
-{"status":"UP","application":"TRAMA Backend"}
-```
+### Entidades implementadas
 
-O perfil local cria as três cidades permitidas e cinco categorias iniciais caso ainda não existam. Ele não cria confecções, usuários ou vendas fictícias automaticamente.
+| Entidade | Principais atributos | Relacionamentos |
+|---|---|---|
+| Cidade | id, nome, uf | Referenciada por Confecção. |
+| Confecção | id, nome, cnpj, porte, tipo | ManyToOne com Cidade. |
+| Usuário | id, nome, email, senha_hash, perfil | Relacionado à Confecção quando aplicável e aos registros de domínio correspondentes. |
+| Categoria | id, nome | Referenciada por Lançamento Mensal e Cenário de Concorrência. |
+| Lançamento Mensal | id, mesReferencia, quantidade, faturamento, origem | ManyToOne com Confecção e Categoria. |
+| Cenário de Concorrência | id, nome, percentualImpacto | ManyToOne com Categoria e Usuário. |
 
-## Conectar ao MySQL já existente
+### Relacionamentos principais
 
-**Não execute um script que comece com `DROP DATABASE` em um banco que contenha dados a preservar.** O script completo fornecido pela equipe recria o banco `confeccoes`; utilize-o somente em ambiente descartável quando tiver certeza de que deseja apagar os dados.
+- **Cidade e Confecção:** uma cidade pode estar relacionada a várias confecções, mas cada confecção pertence a uma cidade.
+- **Confecção e Lançamento Mensal:** uma confecção pode possuir vários lançamentos, mas cada lançamento está associado a uma confecção.
+- **Categoria e Lançamento Mensal:** uma categoria pode classificar vários lançamentos, mas cada lançamento possui uma categoria.
+- **Categoria e Cenário de Concorrência:** uma categoria pode estar associada a diferentes cenários.
+- **Usuário e Cenário de Concorrência:** um usuário pode criar diferentes cenários de concorrência.
 
-1. Confirme que o banco `confeccoes` já existe e que o schema da equipe foi aplicado.
-2. Execute uma única vez a migração `database/migrations/V0_3_2__origem_dado_lancamento.sql` no banco existente. Ela acrescenta a procedência do dado sem recriar as tabelas.
-3. Configure as variáveis de ambiente:
+Os relacionamentos são representados nas entidades Java por meio das anotações JPA e das respectivas chaves estrangeiras do banco.
 
-```bash
-export DB_URL='jdbc:mysql://localhost:3306/confeccoes?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Recife&characterEncoding=UTF-8'
-export DB_USERNAME='seu_usuario'
-export DB_PASSWORD='sua_senha'
-```
+### Repositórios
 
-4. Inicie o perfil MySQL:
+Foram criados repositórios utilizando `JpaRepository`, responsável por disponibilizar operações de persistência, consulta, atualização e exclusão.
 
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
+Os repositórios centralizam o acesso às entidades e permitem utilizar métodos de consulta derivados, evitando a necessidade de escrever SQL manual para as operações básicas.
 
-O perfil `dev` usa `ddl-auto: validate`, ou seja, valida o schema existente sem alterar automaticamente as tabelas.
+## 5. Regras de negócio implementadas
 
-## Usar SQLite
+As regras de negócio são aplicadas na camada Service e complementadas pelas validações dos DTOs e pelas restrições do banco de dados.
 
-O driver e o dialeto do SQLite estão incluídos. Para iniciar com um arquivo local:
+| Regra | Funcionamento |
+|---|---|
+| Categoria obrigatória | O nome da categoria não pode ser vazio. |
+| Categoria única | Não é permitido cadastrar categorias duplicadas. |
+| Limite de caracteres | O nome da categoria aceita até 50 caracteres. |
+| Cidade homologada | Confecções devem estar associadas a Toritama, Caruaru ou Santa Cruz do Capibaribe. |
+| Campos obrigatórios | Nome e cidade são obrigatórios no cadastro de uma confecção. |
+| Quantidade válida | A quantidade de vendas deve ser um número inteiro maior ou igual a zero. |
+| Faturamento válido | O valor informado deve ser decimal maior ou igual a zero. |
+| Mês de referência | O lançamento deve utilizar o formato `AAAA-MM`. |
+| Prevenção de duplicidade | Não pode existir mais de um lançamento para a mesma confecção, categoria e mês. |
+| Procedência do dado | Cada lançamento deve identificar a origem da informação e o nome da fonte. |
 
-```bash
-export SQLITE_URL='jdbc:sqlite:./data/confeccoes.db'
-./mvnw spring-boot:run -Dspring-boot.run.profiles=sqlite
-```
+### Procedência dos dados
 
-O diretório do arquivo precisa existir. O perfil SQLite permite evolução inicial do schema via Hibernate, mas a migração MySQL fornecida não se aplica automaticamente ao SQLite.
+A aplicação diferencia duas informações:
 
-## Endpoints
+- `origem`: identifica como o registro foi inserido no sistema, podendo ser `MANUAL` ou `IMPORTACAO`.
+- `origemDado`: identifica de onde veio a informação, podendo ser `ENTREVISTA`, `QUESTIONARIO` ou `FONTE_SECUNDARIA`.
 
-### Saúde
+O campo `nomeFonte` registra a identificação da fonte utilizada.
 
-- `GET /api/health`
+Essa separação evita confundir o método de inclusão do registro com a procedência da informação.
 
-### Cidades permitidas
+## 6. Endpoints REST
 
-- `GET /api/cidades`
+Os endpoints seguem o padrão REST, utilizando os métodos HTTP para realizar operações sobre os recursos da aplicação. As respostas são disponibilizadas no formato JSON.
 
-Retorna apenas Toritama, Caruaru e Santa Cruz do Capibaribe (PE), usadas para cadastrar novas confecções.
+### Saúde da aplicação
+
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| GET | `/api/health` | Verifica se a API está funcionando. |
+
+### Cidades
+
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| GET | `/api/cidades` | Lista as cidades homologadas para cadastro de confecções. |
 
 ### Categorias
 
-- `GET /api/categorias`
-- `GET /api/categorias/{id}`
-- `POST /api/categorias`
-- `PUT /api/categorias/{id}`
-- `DELETE /api/categorias/{id}`
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| GET | `/api/categorias` | Lista as categorias. |
+| GET | `/api/categorias/{id}` | Consulta uma categoria específica. |
+| POST | `/api/categorias` | Cadastra uma categoria. |
+| PUT | `/api/categorias/{id}` | Atualiza uma categoria. |
+| DELETE | `/api/categorias/{id}` | Exclui uma categoria. |
 
-Exemplo de criação:
-
-```bash
-curl -i -X POST http://localhost:8080/api/categorias \
-  -H 'Content-Type: application/json' \
-  -d '{"nome":"Jeans"}'
-```
-
-Nome é obrigatório e tem limite de 50 caracteres. Duplicatas (ignorando maiúsculas/minúsculas) retornam HTTP 400 com `Categoria já cadastrada`.
+**Validações:** o nome é obrigatório, possui limite de 50 caracteres e não pode ser duplicado. Uma tentativa de cadastro duplicado retorna HTTP 400 com a mensagem `Categoria já cadastrada`.
 
 ### Confecções
 
-- `GET /api/confeccoes`
-- `GET /api/confeccoes/{id}`
-- `POST /api/confeccoes`
-- `PUT /api/confeccoes/{id}`
-- `DELETE /api/confeccoes/{id}`
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| GET | `/api/confeccoes` | Lista as confecções cadastradas. |
+| GET | `/api/confeccoes/{id}` | Consulta uma confecção específica. |
+| POST | `/api/confeccoes` | Cadastra uma confecção. |
+| PUT | `/api/confeccoes/{id}` | Atualiza uma confecção. |
+| DELETE | `/api/confeccoes/{id}` | Exclui uma confecção. |
+
+**Validações:** nome e cidade são obrigatórios. São permitidas apenas as cidades de Toritama, Caruaru e Santa Cruz do Capibaribe. O porte aceita `MICRO`, `PEQUENA` ou `MEDIA`, enquanto o tipo aceita `CONFECCAO` ou `FACCAO`.
+
+### Lançamentos mensais de vendas
+
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| POST | `/api/vendas` | Cadastra um lançamento mensal. |
+| GET | `/api/vendas` | Lista lançamentos com filtros. |
+| GET | `/api/vendas/{id}` | Consulta um lançamento específico. |
+| PUT | `/api/vendas/{id}` | Atualiza um lançamento. |
+| DELETE | `/api/vendas/{id}` | Cancela logicamente um lançamento. |
+
+O endpoint de listagem permite utilizar os seguintes parâmetros:
+
+- `categoria`: identificador da categoria.
+- `confeccao`: identificador da confecção.
+- `mesAno`: mês e ano de referência no formato `AAAA-MM`.
 
 Exemplo:
 
-```bash
-curl -i -X POST http://localhost:8080/api/confeccoes \
-  -H 'Content-Type: application/json' \
-  -d '{"nome":"Confecção Agreste","cnpj":null,"porte":"PEQUENA","tipo":"CONFECCAO","cidade":"Caruaru"}'
-```
+`GET /api/vendas?categoria=1&confeccao=1&mesAno=2026-10`
 
-`cidade` aceita apenas `Toritama`, `Caruaru` ou `Santa Cruz do Capibaribe`, ignorando maiúsculas/minúsculas e acentuação. `porte` aceita `MICRO`, `PEQUENA` ou `MEDIA`; `tipo` aceita `CONFECCAO` ou `FACCAO`.
+### Estrutura de um lançamento
 
-### Vendas mensais
-
-- `POST /api/vendas`
-- `GET /api/vendas?categoria={id}&confeccao={id}&mesAno=AAAA-MM`
-- `GET /api/vendas/{id}`
-- `PUT /api/vendas/{id}`
-- `DELETE /api/vendas/{id}` — cancela logicamente o lançamento (`lanc_status=CANCELADO`).
-
-Exemplo (crie categoria e confecção antes e substitua os IDs):
-
-```bash
-curl -i -X POST http://localhost:8080/api/vendas \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "idConfeccao": 1,
-    "idCategoria": 1,
-    "mesAno": "2026-10",
-    "quantidade": 120,
-    "faturamento": 3600.00,
-    "origem": "MANUAL",
-    "origemDado": "FONTE_SECUNDARIA",
-    "nomeFonte": "Relatório setorial identificado"
-  }'
-```
-
-Campos importantes:
-
-- `mesAno`: formato `AAAA-MM`; o backend grava o primeiro dia do mês em `mes_referencia`.
-- `quantidade`: inteiro maior ou igual a zero.
-- `faturamento`: número decimal maior ou igual a zero.
-- `origem`: método de inclusão (`MANUAL` ou `IMPORTACAO`), compatível com a tabela atual.
-- `origemDado`: procedência da informação (`ENTREVISTA`, `QUESTIONARIO` ou `FONTE_SECUNDARIA`).
-- `nomeFonte`: identificação da origem/coleta, devolvida na resposta JSON.
-
-Não é permitido cadastrar mais de um lançamento para a mesma confecção, categoria e mês, mesmo se os valores forem diferentes. A API retorna HTTP 400 quando detecta duplicidade ou valor negativo.
-
-## Migração de procedência dos dados (BACK-04)
-
-O schema original possui `origem` com valores `MANUAL` e `IMPORTACAO`, que indicam como o registro entrou no sistema. A issue também pede a fonte da informação (entrevista, questionário ou fonte secundária). Para não misturar dois conceitos diferentes, esta implementação adiciona os campos `origem_dado` e `nome_fonte` por meio de uma migração separada.
-
-Execute a migração antes de iniciar o perfil MySQL. Registros antigos recebem um valor padrão explícito de legado; substitua esse valor pelo nome da fonte verdadeira quando a equipe puder identificá-la.
-
-## Códigos de erro
-
-O backend retorna erros em JSON:
+Exemplo de requisição para cadastro:
 
 ```json
 {
-  "timestamp": "2026-10-27T12:00:00Z",
-  "status": 400,
-  "error": "Bad Request",
-  "message": "Categoria já cadastrada",
-  "path": "/api/categorias"
+  "idConfeccao": 1,
+  "idCategoria": 1,
+  "mesAno": "2026-10",
+  "quantidade": 120,
+  "faturamento": 3600.00,
+  "origem": "MANUAL",
+  "origemDado": "ENTREVISTA",
+  "nomeFonte": "Entrevista de teste"
 }
 ```
 
-- `400`: dados inválidos, duplicidade ou violação de regra de negócio.
-- `404`: recurso não encontrado.
-- `500`: erro inesperado, sem expor detalhes internos.
+O backend valida os campos recebidos, verifica a existência da confecção e da categoria e impede a criação de outro lançamento para a mesma combinação de confecção, categoria e mês.
 
-## Testes
+O mês informado é armazenado no banco como o primeiro dia do mês de referência.
 
-```bash
-./mvnw clean test
-```
+### Cancelamento de lançamentos
 
-Os testes cobrem o health check, CRUD de categorias, CRUD de confecções, duplicidade de categorias, restrição de cidade, criação e duplicidade de vendas, procedência devolvida em JSON e bloqueio de quantidade negativa.
+O endpoint DELETE de vendas realiza o cancelamento lógico do registro, alterando seu status para `CANCELADO`.
 
-**Status da validação desta entrega:** o `pom.xml` e os arquivos YAML foram verificados estruturalmente. O build Maven e os testes de integração não puderam ser executados neste ambiente de criação, pois Maven não está instalado e o ambiente não conseguiu acessar a internet para baixar as dependências. Execute `./mvnw clean test` ou `mvnw.cmd clean test` no seu computador para confirmar a compilação completa.
+O lançamento permanece armazenado no banco, permitindo preservar seu histórico. Registros cancelados não devem ser considerados nos indicadores e relatórios.
 
-## Estrutura do projeto
+## 7. Integração com o banco de dados SQL
 
-```text
-src/main/java/br/com/trama/
-  config/       Configuração de CORS e Spring Security
-  controller/   Endpoints REST
-  dto/          Contratos JSON e validação de entrada
-  error/        Respostas e tratamento de erros
-  model/        Entidades JPA
-  model/enums/  Enums das regras de domínio
-  repository/   Repositórios Spring Data JPA
-  service/      Regras de negócio
-src/main/resources/
-  application.yml
-  application-local.yml
-  application-dev.yml
-  application-sqlite.yml
-database/migrations/
-  V0_3_2__origem_dado_lancamento.sql
-src/test/java/br/com/trama/
-  ApiIntegrationTest.java
-```
+O backend foi estruturado para trabalhar com o modelo relacional desenvolvido pela equipe de Banco de Dados.
 
-## Limitações conhecidas / próximos passos
-
-- Esta entrega implementa as quatro issues descritas: bootstrap, mapeamento JPA, CRUD de categorias/confecções e API de lançamentos mensais.
-- A autenticação/autorização ainda não foi implementada nesta entrega. A configuração atual libera os endpoints para testes locais; não publique com dados reais antes de fechar essa parte.
-- A importação CSV completa, indicadores agregados, IA e pesquisa de tendências não pertencem às quatro issues incluídas e podem ser implementadas em issues seguintes.
+O banco principal do projeto utiliza MySQL 8 e possui estruturas
