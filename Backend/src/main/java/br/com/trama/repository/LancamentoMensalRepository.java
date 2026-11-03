@@ -28,4 +28,29 @@ public interface LancamentoMensalRepository extends JpaRepository<LancamentoMens
             @Param("idConfeccao") Long idConfeccao,
             @Param("mesReferencia") LocalDate mesReferencia,
             @Param("status") StatusLancamento status);
+
+    /**
+     * BACK-05: soma de quantidade e faturamento por categoria em um período (meses inclusivos),
+     * com filtros opcionais de categoria e cidade. Cada linha: [idCategoria, nome, quantidade, faturamento].
+     */
+    @Query("""
+            SELECT l.categoria.idCategoria,
+                   l.categoria.nome,
+                   COALESCE(SUM(l.quantidade), 0L),
+                   COALESCE(SUM(l.faturamento), 0.0)
+            FROM LancamentoMensal l
+            WHERE l.status = :status
+              AND (:categoriaId IS NULL OR l.categoria.idCategoria = :categoriaId)
+              AND (:cidade IS NULL OR LOWER(l.confeccao.cidade.nome) = LOWER(:cidade))
+              AND l.mesReferencia >= :inicio
+              AND l.mesReferencia <= :fim
+            GROUP BY l.categoria.idCategoria, l.categoria.nome
+            ORDER BY l.categoria.nome
+            """)
+    List<Object[]> agregarIndicadores(
+            @Param("categoriaId") Long categoriaId,
+            @Param("cidade") String cidade,
+            @Param("inicio") LocalDate inicio,
+            @Param("fim") LocalDate fim,
+            @Param("status") StatusLancamento status);
 }
