@@ -384,3 +384,120 @@ A entrega atual contempla as quatro primeiras issues do backend:
 | BACK-04 | Cadastro e consulta de lançamentos mensais |
 
 As funcionalidades de importação completa de planilhas, geração de relatórios, indicadores de mercado, análise de tendências e integração com IA fazem parte de etapas posteriores do desenvolvimento do TRAMA.
+Funcionalidades Implementadas nas Etapas Posteriores
+
+As funcionalidades previstas nas issues BACK-05, BACK-06 e BACK-07 foram adicionadas à API para ampliar as capacidades analíticas e de segurança do sistema.
+
+*BACK-05 — Indicadores de Mercado e Tendência*
+RF05 — Indicadores Agregados
+
+Foi implementado o endpoint:
+HTTP
+GET /api/indicadores
+
+Permite consultar:
+Quantidade total vendida.
+Faturamento total.
+Indicadores por categoria.
+Filtros por cidade.
+Filtros por período inicial e final.
+
+Exemplo: HTTP
+GET /api/indicadores?categoriaId=1&cidade=Caruaru&inicio=2026-01&fim=2026-06
+
+Caso não existam registros para o período informado, a API retorna uma resposta estruturada informando a ausência de dados.
+
+*RF06 — Classificação de Tendência*
+
+O sistema compara o faturamento do período selecionado com o período anterior de mesma duração.
+
+Classificações suportadas:
+
+Variação	        Tendência≥
++5%	               ALTA
+Entre -5% e +5%	   ESTÁVEL
+≤ -5%	             QUEDA
+
+Exemplo:Plain Text
+1 Período anterior: R$ 10.000
+2 Período atual: R$ 11.000
+3 Resultado: ALTA (+10%)
+
+
+**BACK-06 — Simulação de Cenários de Concorrência**
+RF07 — Simulação de Impacto
+
+Foi implementado o cálculo de impacto da concorrência sobre o faturamento projetado.
+
+Endpoint:HTTP
+POST /api/cenarios/simular
+
+Fórmula utilizada: Plain Text
+Faturamento Hipotético =
+Faturamento Histórico × (1 - Percentual/100)
+
+O percentual de impacto é validado entre:Plain Text
+0% e 100%
+
+A resposta retorna:
+
+Faturamento real.
+Faturamento hipotético.
+Diferença em reais.
+Diferença percentual.
+
+*RF08 — Persistência de Cenários*
+
+Foram adicionados endpoints para gerenciamento de cenários:  HTTP
+POST /api/cenarios
+GET /api/cenarios
+ 
+
+Os cenários são associados aos usuários responsáveis e podem ser reutilizados para consultas futuras.
+
+**BACK-07 — Autenticação e Controle de Acesso**
+RF09 — Segurança da API
+
+Foi iniciada a implementação de autenticação baseada em JWT utilizando Spring Security.
+
+Endpoint de autenticação:  HTTP
+POST /api/auth/login
+
+A autenticação utiliza:
+Usuário cadastrado.
+E-mail.
+Token JWT.
+
+Controle por Perfil
+
+Perfis suportados:
+
+**Perfil**                         **Permissões**
+ADMIN	                   Cadastro, atualização e exclusão de registros
+CONFECCAO	               Acesso às consultas e funcionalidades analíticas
+
+Os endpoints de alteração de dados passaram a utilizar restrições por perfil através das anotações:
+
+Java
+@PreAuthorize("hasRole('ADMIN')")
+
+Aplicadas em:Plain Text
+/api/categorias
+/api/confeccoes
+/api/vendas
+
+Para operações: Plain Text
+1 POST
+2 PUT
+3 DELETE
+
+Situação Atual do Projeto
+Issue	   Funcionalidade	             Status
+BACK-01	 Estrutura Spring Boot	      ✅
+BACK-02	 Entidades e Repositórios	    ✅
+BACK-03	 CRUD Categorias e Confecções	✅
+BACK-04	 Vendas Mensais	              ✅
+BACK-05	 Indicadores e Tendências    	✅
+BACK-06	 Simulação de Cenários	      ✅
+BACK-07	 Autenticação e Autorização	  ✅ Em evolução
+
