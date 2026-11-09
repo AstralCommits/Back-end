@@ -1,0 +1,74 @@
+@baseUrl = http://localhost:8080
+@token = COLE_AQUI_O_JWT_RETORNADO_NO_LOGIN
+
+### Login (use e-mail e senha de um usuário com senha BCrypt cadastrada)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario@exemplo.com",
+  "senha": "sua-senha"
+}
+
+### Health (público)
+GET {{baseUrl}}/api/health
+
+### Cidades homologadas
+GET {{baseUrl}}/api/cidades
+Authorization: Bearer {{token}}
+
+### Listar categorias
+GET {{baseUrl}}/api/categorias
+Authorization: Bearer {{token}}
+
+### Criar categoria (ADMIN)
+POST {{baseUrl}}/api/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Jeans"
+}
+
+### Criar confecção (ADMIN)
+POST {{baseUrl}}/api/confeccoes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Confecção Modelo API",
+  "cnpj": null,
+  "porte": "PEQUENA",
+  "tipo": "CONFECCAO",
+  "cidade": "Caruaru"
+}
+
+### Criar lançamento mensal (ADMIN ou EMPRESARIO da confecção informada)
+POST {{baseUrl}}/api/vendas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idConfeccao": 1,
+  "idCategoria": 1,
+  "mesAno": "2026-11",
+  "quantidade": 120,
+  "faturamento": 3600.00,
+  "origem": "MANUAL",
+  "origemDado": "FONTE_SECUNDARIA",
+  "nomeFonte": "Relatório setorial identificado"
+}
+
+### Consultar vendas por filtros
+GET {{baseUrl}}/api/vendas?categoria=1&confeccao=1&mesAno=2026-11
+Authorization: Bearer {{token}}
+
+### Simular impacto (usa faturamento ativo do banco)
+POST {{baseUrl}}/api/cenarios/simular
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoriaId": 1,
+  "percentualImpacto": 10.00
+}
