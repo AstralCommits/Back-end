@@ -4,8 +4,8 @@ O backend é um único projeto, em um único repositório e com um fluxo sequenc
 
 | Responsabilidade | Issues | Quantidade | Participação aproximada | Etapa/branch |
 |---|---|---:|---:|---|
-| Ester Reis | #1, #2, #3, #4, #12, #13 e #17 | 7 | 64% | Base histórica + Etapa 1 |
-| Gabriela Olegário | #11, #14, #15 e #16 | 4 | 36% | Etapa 2 |
+| Ester Reis | #1, #2, #3, #4, #12, #13 e #17 | 7 | 50% | Base histórica + Etapa 1 |
+| Gabriela Olegário | #7, #8, #9, #11, #14, #15 e #16 | 7 | 50% | Etapa1 + Etapa 2 |
 
 ## Etapa 1 — Ester Reis
 
