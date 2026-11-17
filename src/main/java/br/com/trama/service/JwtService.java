@@ -34,6 +34,7 @@ public class JwtService {
                 .subject(usuario.getUsername())
                 .claim("uid", usuario.getIdUsuario())
                 .claim("perfil", usuario.getPerfil().name())
+                .claim("role", usuario.getPerfil().name())
                 .claim("idConfeccao", usuario.getIdConfeccao())
                 .issuedAt(agora)
                 .expiration(new Date(agora.getTime() + expirationMs))
@@ -43,6 +44,10 @@ public class JwtService {
 
     public String obterEmail(String token) {
         return claims(token).getSubject();
+    }
+
+    public String obterRole(String token) {
+        return claims(token).get("role", String.class);
     }
 
     public boolean tokenValido(String token, UserDetails userDetails) {

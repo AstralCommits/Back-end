@@ -1,7 +1,6 @@
 package br.com.trama.model.enums;
 
-/** Perfis aceitos pelo schema atualizado do banco de dados. */
+/** Perfis de acesso da plataforma. */
 public enum PerfilUsuario {
-    ADMIN,
-    EMPRESARIO
+    ADMIN, EMPRESARIO, ARTESAO
 }
