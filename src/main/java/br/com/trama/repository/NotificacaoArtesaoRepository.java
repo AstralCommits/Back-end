@@ -1,0 +1,1 @@
+package br.com.trama.repository; import br.com.trama.model.NotificacaoArtesao; import org.springframework.data.jpa.repository.JpaRepository; public interface NotificacaoArtesaoRepository extends JpaRepository<NotificacaoArtesao,Long>{}

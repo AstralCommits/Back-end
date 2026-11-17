@@ -1,0 +1,1 @@
+package br.com.trama.repository; import br.com.trama.model.CotacaoCorporativa; import org.springframework.data.jpa.repository.JpaRepository; public interface CotacaoRepository extends JpaRepository<CotacaoCorporativa,Long>{}

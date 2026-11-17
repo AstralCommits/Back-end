@@ -1,0 +1,3 @@
+package br.com.trama.model;
+import jakarta.persistence.*;
+@Entity @Table(name="item_cotacao") public class ItemCotacao { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) @Column(name="id_item") private Long id; @ManyToOne(optional=false,fetch=FetchType.LAZY) @JoinColumn(name="id_cotacao",nullable=false) private CotacaoCorporativa cotacao; @ManyToOne(optional=false,fetch=FetchType.LAZY) @JoinColumn(name="id_produto",nullable=false) private Produto produto; public ItemCotacao(){} public Long getId(){return id;} public CotacaoCorporativa getCotacao(){return cotacao;} public void setCotacao(CotacaoCorporativa v){cotacao=v;} public Produto getProduto(){return produto;} public void setProduto(Produto v){produto=v;} }
