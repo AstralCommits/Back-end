@@ -54,6 +54,18 @@ public class ApiExceptionHandler {
         return response(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ProblemDetail> handleForbidden(ForbiddenException ex,
+                                                          HttpServletRequest request) {
+        return response(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ProblemDetail> handleConflict(ConflictException ex,
+                                                         HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> handleUnreadable(HttpMessageNotReadableException ex,
                                                             HttpServletRequest request) {
