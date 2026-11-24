@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:trama-test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: never
+trama:
+  jwt:
+    secret: test-only-secret-key-with-at-least-32-characters
+    expiration-ms: 3600000
