@@ -1,54 +1,109 @@
-# TRAMA | Backend — Etapa 1
+## Descrição
 
-Esta branch reúne a primeira etapa de desenvolvimento e atualização do backend do TRAMA. Seu objetivo é concentrar as funcionalidades relacionadas à estrutura principal da aplicação, ao gerenciamento de dados e às regras de negócio necessárias para o funcionamento da plataforma.
+Este Pull Request reúne as implementações relacionadas às issues **FRONT-05 (#15)** e **FRONT-06 (#16)**, com o objetivo de ampliar as funcionalidades do marketplace da TRAMA, melhorar a experiência de navegação em dispositivos móveis e disponibilizar uma área de acompanhamento para os artesãos.
 
-A branch `backend-regras-importacao` foi criada a partir da `develop` e contém as implementações das issues #1 a #4, #12, #13 e #17.
+As alterações foram desenvolvidas considerando a estrutura visual e a proposta da plataforma, priorizando responsividade, organização dos componentes, facilidade de utilização e separação entre dados demonstrativos e futuras integrações com o backend.
 
-## Issues desta etapa
+### 1. FRONT-06 (#16) — Responsividade do catálogo
 
-- **#1 a #4:** configuração inicial do projeto Spring Boot, criação das entidades e repositórios JPA, gerenciamento de categorias e confecções e operações relacionadas aos lançamentos mensais.
-- **#12 — BACK-08:** implementação do tratamento global de exceções, utilizando Problem Details conforme a RFC 7807, para padronizar as respostas de erro da API.
-- **#13 — BACK-09:** desenvolvimento da importação de dados de vendas por arquivos CSV, incluindo validação dos registros, associação ao usuário responsável e controle transacional.
-- **#17:** atualização das regras de usuários e perfis, com suporte aos perfis `ADMIN` e `EMPRESARIO`, controle de acesso aos dados por confecção e validação do impacto dos cenários entre 0 e 100.
+Foi desenvolvida uma interface de catálogo adaptável a diferentes tamanhos de tela, especialmente dispositivos móveis com larguras entre 360px e 480px.
 
-## Organização das branches
+**Principais implementações:**
 
-O repositório utiliza branches para organizar o desenvolvimento e manter a versão principal do projeto estável.
+- Adaptação da disposição dos produtos para telas menores, com organização em uma ou duas colunas conforme o espaço disponível.
+- Implementação de menu lateral mobile, acionado por um botão de menu (hambúrguer).
+- Inclusão de fundo sobreposto para facilitar o fechamento do menu ao clicar fora dele.
+- Fechamento do menu pela tecla `Esc`.
+- Bloqueio da rolagem do conteúdo de fundo enquanto o menu estiver aberto.
+- Gerenciamento de foco e atributos de acessibilidade, como `aria-expanded`, `aria-controls` e `aria-modal`.
+- Ajuste das áreas de interação para facilitar o uso por toque, respeitando a dimensão mínima prevista de 44px.
+- Tratamento de espaçamentos e dimensões para reduzir problemas de rolagem horizontal.
+- Ajuste do tamanho da fonte dos campos de formulário em dispositivos móveis.
 
-- **`main`:** mantém a versão estável e consolidada do backend.
-- **`develop`:** reúne as funcionalidades integradas e validadas pela equipe durante o desenvolvimento.
-- **`backend-regras-importacao`:** concentra as implementações da primeira etapa do backend, antes de serem integradas à `develop`.
+Também foi adicionado o breakpoint personalizado `xs`, correspondente a 360px, para permitir ajustes mais específicos em telas pequenas.
 
-As alterações desta branch devem ser revisadas e integradas à `develop` por meio de um Pull Request. A próxima etapa será desenvolvida em uma nova branch, criada a partir da `develop` atualizada.
+### 2. FRONT-05 (#15) — Painel do artesão
 
-## Alinhamento com o Banco de Dados
+Foi implementada uma tela de acompanhamento dos pedidos recebidos pelo artesão, permitindo visualizar informações financeiras e atualizar o andamento da produção.
 
-Esta etapa considera a estrutura e as regras definidas pela equipe de Banco de Dados, incluindo os perfis `ADMIN` e `EMPRESARIO`, a restrição `chk_cenario_impacto` e os campos relacionados à origem dos dados.
+**Principais implementações:**
 
-O backend também prevê o armazenamento do campo `nome_fonte`, conforme a necessidade de identificação da origem dos lançamentos. A migração `V0_5_0__nome_fonte_lancamento.sql` deverá ser alinhada e aprovada pela equipe de Banco de Dados antes de sua aplicação no MySQL.
+- Cards com resumo financeiro e informações dos pedidos.
+- Exibição dos valores previstos para repasse ao artesão.
+- Aplicação do percentual mínimo de repasse social de 85%.
+- Apresentação do percentual e do valor correspondente ao repasse por pedido.
+- Listagem do histórico de pedidos.
+- Filtro de pedidos por mês.
+- Atualização do status de produção de cada pedido.
+- Feedback visual para estados de carregamento, sucesso e erro durante as atualizações.
+- Organização da listagem em tabela para telas maiores e em cartões para dispositivos móveis.
 
-A migração `V0_4_0` não deve ser executada caso as alterações correspondentes ao PR #6 já estejam aplicadas no banco.
+O fluxo de status contempla as seguintes etapas:
 
-## Execução local
+1. Recebido;
+2. Em produção;
+3. Pronto;
+4. Enviado;
+5. Entregue.
 
-O projeto utiliza Java 21 e Maven. O perfil padrão `local` utiliza o banco H2 em memória para facilitar a execução e os testes durante o desenvolvimento.
+### 3. Organização técnica
 
-No Windows:
+Para facilitar a manutenção e futuras evoluções, os dados demonstrativos e a lógica da interface foram organizados em arquivos separados.
+
+Foram incluídos:
+
+- Dados simulados de produtos para o catálogo.
+- Dados simulados de pedidos para o painel do artesão.
+- Serviço responsável por abstrair o acesso aos pedidos, permitindo uma futura integração com a API.
+- Funções auxiliares para os cálculos financeiros.
+- Componente compartilhado de menu lateral responsivo.
+- Rotas específicas para o catálogo e para o painel do artesão.
+
+As novas rotas previstas são:
+
+- `/catalogo`
+- `/painel-artesao`
+
+**Importante:** os dados utilizados nesta etapa são demonstrativos. As operações do painel não representam persistência real no banco de dados, e a atualização dos pedidos permanece restrita ao estado da aplicação enquanto não houver integração com o backend.
+
+### 4. Documentação
+
+Também foi incluído o arquivo `README.md` com informações sobre as funcionalidades implementadas, organização dos arquivos e orientações relacionadas à execução e aos testes do projeto.
+
+### 5. Testes e validações
+
+Foi executado o teste automatizado das funções de cálculo financeiro:
 
 ```bash
-mvnw.cmd clean test
-mvnw.cmd spring-boot:run
+node --test apps/web/tests/orderFinancials.test.mjs
 ```
 
-No Linux/macOS:
+**Resultado:** 7 testes executados com sucesso.
 
-```bash
-./mvnw clean test
-./mvnw spring-boot:run
-```
+As demais validações ainda precisam ser realizadas no ambiente atualizado do projeto:
 
-## Próxima etapa
+- [ ] Executar a instalação das dependências.
+- [ ] Executar o build da aplicação.
+- [ ] Executar a verificação de tipos e o lint, conforme os scripts disponíveis.
+- [ ] Verificar visualmente o catálogo nas larguras de 360px, 390px, 420px e 480px.
+- [ ] Validar a abertura e o fechamento do menu mobile.
+- [ ] Verificar o funcionamento do painel e a atualização dos status.
+- [ ] Conferir a integração das novas rotas com a navegação existente.
 
-Esta branch corresponde à primeira etapa de desenvolvimento do backend. Após sua revisão e integração à `develop`, será iniciada a segunda etapa, contemplando a documentação da API com OpenAPI/Swagger, testes automatizados adicionais, análise de cobertura com JaCoCo, integração com SonarQube e configuração de CI com GitHub Actions.
+Não foi possível concluir essas validações nesta etapa, portanto o resultado dos sete testes financeiros não deve ser interpretado como uma validação completa da aplicação.
 
-Essas entregas serão realizadas em uma nova branch, baseada na `develop` atualizada, mantendo a continuidade do desenvolvimento e a organização do histórico do projeto.
+### 6. Observações para revisão
+
+- Os dados utilizados são fictícios e servem exclusivamente para demonstração.
+- As imagens dos produtos ainda precisam ser substituídas ou conectadas às imagens definitivas do projeto.
+- A integração real com o backend e a persistência dos pedidos não fazem parte desta implementação.
+- A integração dos arquivos com a estrutura atual do repositório deve ser conferida antes da aprovação.
+
+### Issues relacionadas
+
+- Referência: #15 — FRONT-05: Painel do artesão.
+- Referência: #16 — FRONT-06: Responsividade do catálogo.
+
+### Resultado esperado
+
+Com essas implementações, espera-se oferecer uma navegação mais adequada em dispositivos móveis e disponibilizar ao artesão uma área organizada para acompanhar pedidos, valores de repasse e etapas de produção, mantendo a estrutura preparada para futuras integrações com os serviços da TRAMA.
